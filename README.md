@@ -1,4 +1,4 @@
-# RealVision — Deepfake Video Detection with Explainable AI (XAI)
+# RealVision - Deepfake Video Detection with Explainable AI (XAI)
 
 **RealVision** is a deep learning project for **binary deepfake video classification** *(Real vs. Fake)* using:
 - a **video-only baseline** (EfficientNet-B0 + temporal average pooling), and  
