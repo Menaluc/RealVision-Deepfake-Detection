@@ -1,0 +1,16 @@
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+.DS_Store
+.env
+.env.*
+# Large artifacts / outputs (keep out of git)
+*.pt
+*.pth
+*.ckpt
+*.h5
+*.onnx
+/kaggle/
+/data/
+/datasets/
+/audio_cache/

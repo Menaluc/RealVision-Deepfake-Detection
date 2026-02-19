@@ -1,0 +1,16 @@
+# Minimal requirements (based on notebook imports)
+torch
+torchvision
+torchaudio
+
+timm
+pytorch-grad-cam
+decord
+
+numpy
+pandas
+matplotlib
+scikit-learn
+opencv-python
+tqdm
+Pillow
