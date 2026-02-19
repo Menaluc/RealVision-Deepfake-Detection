@@ -91,8 +91,8 @@ Observation: AV improves accuracy/F1 while changing the FP/FN trade-off.
 ---
 
 ## Authors
-- Odelya Datski
 - Menalu Chekol
+- Odelya Datski
 - Zohar Shalom
 
 Course: Deep Learning | Lecturer: Idan Tobis
