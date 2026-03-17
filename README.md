@@ -1,98 +1,153 @@
-# RealVision - Deepfake Video Detection with Explainable AI (XAI)
+# RealVision – Deepfake Video Detection with Explainable AI (XAI)
 
-**RealVision** is a deep learning project for **binary deepfake video classification** *(Real vs. Fake)* using:
+**RealVision** is a deep learning system for **binary deepfake video classification** *(Real vs. Fake)* using:
 - a **video-only baseline** (EfficientNet-B0 + temporal average pooling), and  
-- an **audio-visual model** that fuses video features with audio MFCC features, with temporal modeling via a Transformer encoder.
+- a **multimodal audio-visual model** that fuses video features with audio MFCC features, with temporal modeling via a Transformer encoder.
 
-The project also includes **Explainable AI (XAI)** using **Grad-CAM** to visually explain model decisions.
+The system also integrates **Explainable AI (XAI)** using **Grad-CAM** to provide visual interpretation of model predictions.
+
+---
+
+## Overview
+
+Deepfakes pose a serious threat to digital trust, enabling misinformation and identity impersonation.  
+This project aims to detect manipulated videos while providing **interpretable and trustworthy predictions**.
 
 ---
 
 ## Dataset
+
 - **FaceForensics++** (Real + Manipulated)
-- Binary labels:
-  - `0` = Real
-  - `1` = Fake (manipulated)
+- 2,000 videos (balanced):
+  - 1,000 real  
+  - 1,000 fake  
+- Split:
+  - Train: 70%  
+  - Validation: 15%  
+  - Test: 15%  
 
 > This repo does **not** include the full dataset files (due to size/licensing).  
 > Run the notebook on Kaggle and attach the dataset there.
 
 ---
 
-## Key Configuration (from the notebook)
+## Key Configuration
+
 - Video: `k_frames=16`, `img_size=224`
 - Audio: `sample_rate=16000`, `audio_seconds=4`, `n_mfcc=40`
 - Batch size: `4`
-- Training:
-  - Baseline epochs: `4`, LR: `3e-4`
-  - AV epochs: `6`, LR: `2e-4`
-  - Optimizer: AdamW, scheduler: CosineAnnealingLR
-  - Early stopping on **Val F1** with `patience=2`
+
+### Training
+- Baseline:
+  - Epochs: `4`, LR: `3e-4`
+- AV model:
+  - Epochs: `6`, LR: `2e-4`
+
+- Optimizer: **AdamW**  
+- Scheduler: **CosineAnnealingLR**  
+- Early stopping on **Val F1** (`patience=2`)
 
 ---
 
 ## Models
 
-### 1) Baseline (Video-only)
+### Baseline (Video-only)
 - Backbone: `tf_efficientnet_b0` (via `timm`)
-- Frame-wise features → **temporal average pooling** → classifier
+- Frame-wise feature extraction  
+- Temporal average pooling  
+- Linear classifier  
 
-### 2) RealVision AV (Video + Audio)
+### RealVision AV (Multimodal)
+
 **Video branch**
-- EfficientNet-B0 backbone
-- Temporal modeling: Transformer Encoder (`nlayers=2`, `nheads=4`)
-- Video embedding: 256-d
+- EfficientNet-B0 backbone  
+- Transformer Encoder (`2 layers`, `4 heads`)  
+- 256-d embedding  
 
 **Audio branch**
-- MFCC input (40 × time)
-- Conv1D feature extractor
-- Audio embedding: 256-d
+- MFCC input (40 coefficients)  
+- Conv1D feature extractor  
+- 256-d embedding  
 
 **Fusion**
-- Concatenation (video + audio) → MLP classifier
+- Concatenation (video + audio)  
+- Fully connected classifier  
 
 ---
 
-## Results (as reported in the notebook)
-- **Baseline (Video-only)**: Accuracy **71.3%**, F1 **0.710**, AUC **0.82**
-- **AV (Video+Audio)**: Accuracy **73.7%**, F1 **0.737**, AUC **0.81**
+## Results
 
-Observation: AV improves accuracy/F1 while changing the FP/FN trade-off.
+| Model            | Accuracy | F1 Score | AUC  |
+|------------------|---------|---------|------|
+| Baseline         | 71.3%   | 0.710   | 0.82 |
+| Multimodal (AV)  | 73.7%   | 0.737   | 0.81 |
+
+### Key Insight
+The multimodal model improves accuracy and F1 score, but introduces a trade-off:  
+- fewer false positives  
+- more missed deepfakes (false negatives)
+
+---
+
+## Evaluation & Visual Results
+
+### Confusion Matrices
+
+#### Baseline Model
+<img src="https://github.com/user-attachments/assets/914c6ffb-4ec6-4735-a8f8-6f68ae0d0a74" width="500"/>
+
+#### Multimodal (AV) Model
+<img src="https://github.com/user-attachments/assets/43910825-41b8-447e-b715-8211620a6c32" width="500"/>
+
+---
+
+### ROC & Precision-Recall
+
+#### Baseline
+<img src="https://github.com/user-attachments/assets/c5a9e76d-441c-419c-a76d-b4d8b9983cac" width="500"/>
+
+#### Multimodal (AV)
+<img src="https://github.com/user-attachments/assets/beb702d7-a47e-4228-94ce-20c301807388" width="500"/>
 
 ---
 
 ## Explainability (XAI)
-- **Grad-CAM** is applied to inspect which facial regions influence the prediction.
-- Implemented with a wrapper to handle temporal (3D) video inputs.
+
+- Grad-CAM applied to validate model decisions  
+- Model focuses on **facial regions rather than background noise**  
+- Improves interpretability and trust  
 
 ---
 
 ## Repository Contents
-- `RealVision_Deepfake_Detection.ipynb` — full end-to-end pipeline:
-  - environment checks
-  - video/audio preprocessing
-  - dataset loading + splits
-  - training (baseline + AV)
-  - evaluation (metrics/curves)
-  - Grad-CAM analysis
-- `requirements.txt` — minimal dependencies (for local runs)
+
+- `RealVision_Deepfake_Detection.ipynb`  
+  - Full pipeline:
+    - preprocessing  
+    - training  
+    - evaluation  
+    - Grad-CAM analysis  
+
+- `requirements.txt`
 
 ---
 
 ## How to Run (Recommended: Kaggle)
-1. Upload this notebook to Kaggle or open it directly in Kaggle.
-2. Attach the FaceForensics++ dataset as a Kaggle input.
-3. Run cells top-to-bottom.
 
-> If running locally/Colab:  
-> - replace Kaggle paths like `/kaggle/input/...`  
-> - ensure **ffmpeg** is installed/available (audio extraction)
+1. Upload the notebook to Kaggle  
+2. Attach FaceForensics++ dataset  
+3. Run all cells  
+
+> For local/Colab:
+> - replace `/kaggle/input/...` paths  
+> - ensure **ffmpeg** is installed  
 
 ---
 
 ## Authors
-- Menalu Chekol
-- Odelya Datski
-- Zohar Shalom
+
+- Menalu Chekol  
+- Odelya Datski  
+- Zohar Shalom  
 
 Course: Deep Learning | Lecturer: Idan Tobis
